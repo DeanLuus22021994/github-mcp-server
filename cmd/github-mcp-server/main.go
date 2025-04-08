@@ -7,6 +7,7 @@ import (
 	stdlog "log"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	"github.com/github/github-mcp-server/pkg/github"
@@ -43,12 +44,25 @@ var (
 			if err != nil {
 				stdlog.Fatal("Failed to initialize logger:", err)
 			}
+
+			enabledToolsets := viper.GetStringSlice("toolsets")
+
+			// Env gets precedence over command line flags
+			if envToolsets := os.Getenv("GITHUB_TOOLSETS"); envToolsets != "" {
+				enabledToolsets = []string{}
+				// Split envFeats by comma, trim whitespace, and add to the slice
+				for _, toolset := range strings.Split(envToolsets, ",") {
+					enabledToolsets = append(enabledToolsets, strings.TrimSpace(toolset))
+				}
+			}
+
 			logCommands := viper.GetBool("enable-command-logging")
 			cfg := runConfig{
 				readOnly:           readOnly,
 				logger:             logger,
 				logCommands:        logCommands,
 				exportTranslations: exportTranslations,
+				enabledToolsets:    enabledToolsets,
 			}
 			if err := runStdioServer(cfg); err != nil {
 				stdlog.Fatal("failed to run stdio server:", err)
@@ -61,6 +75,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	// Add global flags that will be shared by all commands
+	rootCmd.PersistentFlags().StringSlice("toolsets", github.DefaultTools, "A comma separated list of groups of tools to enable, defaults to issues/repos/search")
 	rootCmd.PersistentFlags().Bool("read-only", false, "Restrict the server to read-only operations")
 	rootCmd.PersistentFlags().String("log-file", "", "Path to log file")
 	rootCmd.PersistentFlags().Bool("enable-command-logging", false, "When enabled, the server will log all command requests and responses to the log file")
@@ -68,6 +83,7 @@ func init() {
 	rootCmd.PersistentFlags().String("gh-host", "", "Specify the GitHub hostname (for GitHub Enterprise etc.)")
 
 	// Bind flag to viper
+	_ = viper.BindPFlag("toolsets", rootCmd.PersistentFlags().Lookup("toolsets"))
 	_ = viper.BindPFlag("read-only", rootCmd.PersistentFlags().Lookup("read-only"))
 	_ = viper.BindPFlag("log-file", rootCmd.PersistentFlags().Lookup("log-file"))
 	_ = viper.BindPFlag("enable-command-logging", rootCmd.PersistentFlags().Lookup("enable-command-logging"))
@@ -106,6 +122,7 @@ type runConfig struct {
 	logger             *log.Logger
 	logCommands        bool
 	exportTranslations bool
+	enabledToolsets    []string
 }
 
 func runStdioServer(cfg runConfig) error {
@@ -140,8 +157,18 @@ func runStdioServer(cfg runConfig) error {
 	getClient := func(_ context.Context) (*gogithub.Client, error) {
 		return ghClient, nil // closing over client
 	}
-	// Create
-	ghServer := github.NewServer(getClient, version, cfg.readOnly, t)
+
+	// Create server
+	ghServer := github.NewServer(version)
+
+	// Create toolsets
+	toolsets, err := github.InitToolsets(ghServer, cfg.enabledToolsets, cfg.readOnly, getClient, t)
+	if err != nil {
+		stdlog.Fatal("Failed to initialize toolsets:", err)
+	}
+	// Register the tools with the server
+	toolsets.RegisterTools(ghServer)
+
 	stdioServer := server.NewStdioServer(ghServer)
 
 	stdLogger := stdlog.New(cfg.logger.Writer(), "stdioserver", 0)

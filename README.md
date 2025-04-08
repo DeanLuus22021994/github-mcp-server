@@ -96,6 +96,79 @@ If you don't have Docker, you can use `go` to build the binary in the
 command with the `GITHUB_PERSONAL_ACCESS_TOKEN` environment variable set to
 your token.
 
+## Tool Configuration
+
+The GitHub MCP Server supports enabling or disabling specific groups of functionalities via the `--toolsets` flag. This allows you to control which GitHub API capabilities are available to your AI tools.
+
+### Available Toolsets
+
+The following sets of tools are available:
+
+| Toolset                 | Description                                                   | Default Status |
+| ----------------------- | ------------------------------------------------------------- | -------------- |
+| `repos`                 | Repository-related tools (file operations, branches, commits) | Enabled        |
+| `issues`                | Issue-related tools (create, read, update, comment)           | Enabled        |
+| `search`                | Search functionality (code, repositories, users)              | Enabled        |
+| `pull_requests`         | Pull request operations (create, merge, review)               | Enabled        |
+| `context`               | Tools providing context about current user and GitHub context | Enabled        |
+| `dynamic`               | Tool discovery and dynamic enablement of GitHub MCP tools     | Enabled        |
+| `code_security`         | Code scanning alerts and security features                    | Disabled       |
+| `experiments`           | Experimental features (not considered stable)                 | Disabled       |
+| `all`                   | Special flag to enable all features                           | Disabled       |
+
+### Specifying Toolsets
+
+You can enable specific features in two ways:
+
+1. **Using Command Line Argument**:
+
+   ```bash
+   github-mcp-server --toolsets repos,issues,pull_requests,code_security
+   ```
+
+2. **Using Environment Variable**:
+   ```bash
+   GITHUB_TOOLSETS="repos,issues,pull_requests,code_security" ./github-mcp-server
+   ```
+
+The environment variable `GITHUB_TOOLSETS` takes precedence over the command line argument if both are provided.
+
+### Default Enabled Toolsets
+
+By default, the following toolsets are enabled:
+
+- `repos`
+- `issues`
+- `pull_requests`
+- `search`
+- `context-_ools`
+- `dynamic_tools`
+
+### Using With Docker
+
+When using Docker, you can pass the toolsets as environment variables:
+
+```bash
+docker run -i --rm \
+  -e GITHUB_PERSONAL_ACCESS_TOKEN=<your-token> \
+  -e GITHUB_TOOLSETS="repos,issues,pull_requests,code_security,experiments" \
+  ghcr.io/github/github-mcp-server
+```
+
+### The "everything" Toolset
+
+The special toolset `everything` can be provided to enable all available features regardless of any other toolsets passed:
+
+```bash
+./github-mcp-server --toolsets everything
+```
+
+Or using the environment variable:
+
+```bash
+GITHUB_TOOLSETS="everything" ./github-mcp-server
+```
+
 ## GitHub Enterprise Server
 
 The flag `--gh-host` and the environment variable `GH_HOST` can be used to set
