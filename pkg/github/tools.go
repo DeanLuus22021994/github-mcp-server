@@ -93,7 +93,7 @@ func InitToolsets(s *server.MCPServer, passedToolsets []string, readOnly bool, g
 	tsg.AddToolset(experiments)
 
 	// Need to add the dynamic toolset last so it can be used to enable other toolsets
-	dynamicToolSelection := toolsets.NewToolset("dynamic", "Tool discovery and dynamic enablement of GitHub MCP tools that can help achieve tasks not possible with the current tools, if this is enabled you can list toolsets, get details of what tools each toolset contains and enable toolsets to use them now, you want to list, get and then enable tools in that order").
+	dynamicToolSelection := toolsets.NewToolset("dynamic", "Discover GitHub MCP tools that can help achieve tasks by enabling additional sets of tools, you can control the enablement of any toolset to access its tools when this toolset is enabled.").
 		AddReadTools(
 			toolsets.NewServerTool(ListAvailableToolsets(tsg, t)),
 			toolsets.NewServerTool(GetToolsetsTools(tsg, t)),

@@ -21,7 +21,7 @@ func ToolsetEnum(toolsetGroup *toolsets.ToolsetGroup) mcp.PropertyOption {
 
 func EnableToolset(s *server.MCPServer, toolsetGroup *toolsets.ToolsetGroup, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
 	return mcp.NewTool("enable_toolset",
-			mcp.WithDescription(t("TOOL_ENABLE_TOOLSET_DESCRIPTION", "Enable one of the sets of tools the GitHub MCP server provides, to access the tools and accomplish your goals")),
+			mcp.WithDescription(t("TOOL_ENABLE_TOOLSET_DESCRIPTION", "Enable one of the sets of tools the GitHub MCP server provides, use get_toolset_tools and list_available_toolsets first to see what this will enable")),
 			mcp.WithString("toolset",
 				mcp.Required(),
 				mcp.Description("The name of the toolset to enable"),
@@ -56,16 +56,26 @@ func EnableToolset(s *server.MCPServer, toolsetGroup *toolsets.ToolsetGroup, t t
 
 func ListAvailableToolsets(toolsetGroup *toolsets.ToolsetGroup, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
 	return mcp.NewTool("list_available_toolsets",
-			mcp.WithDescription(t("TOOL_LIST_AVAILABLE_FEATURES_DESCRIPTION", "List all available toolsets this GitHub MCP server can offer, providing the enabled status of each. Use this when you think a task could be achieved with a GitHub product, but you don't think the currently available tools could achieve it")),
+			mcp.WithDescription(t("TOOL_LIST_AVAILABLE_FEATURES_DESCRIPTION", "List all available toolsets this GitHub MCP server can offer, providing the enabled status of each. Use this when a task could be achieved with a GitHub tool and the currently available tools aren't enough. Call get_toolset_tools with these toolset names to discover specific tools you can call")),
 		),
 		func(_ context.Context, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			// We need to convert the toolsetGroup back to a map for JSON serialization
-			featureMap := make(map[string]bool)
-			for name := range toolsetGroup.Toolsets {
-				featureMap[name] = toolsetGroup.IsEnabled(name)
+
+			payload := []map[string]string{}
+
+			for name, ts := range toolsetGroup.Toolsets {
+				{
+					t := map[string]string{
+						"name":              name,
+						"description":       ts.Description,
+						"can_enable":        "true",
+						"currently_enabled": fmt.Sprintf("%t", ts.Enabled),
+					}
+					payload = append(payload, t)
+				}
 			}
 
-			r, err := json.Marshal(featureMap)
+			r, err := json.Marshal(payload)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal features: %w", err)
 			}
@@ -76,7 +86,7 @@ func ListAvailableToolsets(toolsetGroup *toolsets.ToolsetGroup, t translations.T
 
 func GetToolsetsTools(toolsetGroup *toolsets.ToolsetGroup, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
 	return mcp.NewTool("get_toolset_tools",
-			mcp.WithDescription(t("TOOL_GET_TOOLSET_TOOLS_DESCRIPTION", "Lists all the capabilities that are enabled when you enabled a toolset, use this to get clarity on whether enabling a toolset would help you to complete a task")),
+			mcp.WithDescription(t("TOOL_GET_TOOLSET_TOOLS_DESCRIPTION", "Lists all the capabilities that are enabled with the specified toolset, use this to get clarity on whether enabling a toolset would help you to complete a task")),
 			mcp.WithString("toolset",
 				mcp.Required(),
 				mcp.Description("The name of the toolset you want to get the tools for"),
@@ -93,14 +103,19 @@ func GetToolsetsTools(toolsetGroup *toolsets.ToolsetGroup, t translations.Transl
 			if toolset == nil {
 				return mcp.NewToolResultError(fmt.Sprintf("Toolset %s not found", toolsetName)), nil
 			}
+			payload := []map[string]string{}
 
-			tools := make(map[string]string)
-
-			for _, st := range toolset.GetActiveTools() {
-				tools[st.Tool.Name] = st.Tool.Description
+			for _, st := range toolset.GetAvailableTools() {
+				tool := map[string]string{
+					"name":        st.Tool.Name,
+					"description": st.Tool.Description,
+					"can_enable":  "true",
+					"toolset":     toolsetName,
+				}
+				payload = append(payload, tool)
 			}
 
-			r, err := json.Marshal(tools)
+			r, err := json.Marshal(payload)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal features: %w", err)
 			}

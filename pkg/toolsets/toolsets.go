@@ -43,6 +43,13 @@ func (t *Toolset) GetActiveTools() []server.ServerTool {
 	return nil
 }
 
+func (t *Toolset) GetAvailableTools() []server.ServerTool {
+	if t.readOnly {
+		return t.readTools
+	}
+	return append(t.readTools, t.writeTools...)
+}
+
 func (t *Toolset) RegisterTools(s *server.MCPServer) {
 	if !t.Enabled {
 		return
