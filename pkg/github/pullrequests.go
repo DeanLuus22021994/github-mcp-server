@@ -16,7 +16,11 @@ import (
 // GetPullRequest creates a tool to get details of a specific pull request.
 func GetPullRequest(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
 	return mcp.NewTool("get_pull_request",
-			mcp.WithDescription(t("TOOL_GET_PULL_REQUEST_DESCRIPTION", "Get details of a specific pull request")),
+			mcp.WithDescription(t("TOOL_GET_PULL_REQUEST_DESCRIPTION", "Get details of a specific pull request in a GitHub repository.")),
+			mcp.WithToolAnnotation(mcp.ToolAnnotation{
+				Title:        t("TOOL_GET_PULL_REQUEST_USER_TITLE", "Get pull request details"),
+				ReadOnlyHint: true,
+			}),
 			mcp.WithString("owner",
 				mcp.Required(),
 				mcp.Description("Repository owner"),
@@ -74,7 +78,11 @@ func GetPullRequest(getClient GetClientFn, t translations.TranslationHelperFunc)
 // UpdatePullRequest creates a tool to update an existing pull request.
 func UpdatePullRequest(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
 	return mcp.NewTool("update_pull_request",
-			mcp.WithDescription(t("TOOL_UPDATE_PULL_REQUEST_DESCRIPTION", "Update an existing pull request in a GitHub repository")),
+			mcp.WithDescription(t("TOOL_UPDATE_PULL_REQUEST_DESCRIPTION", "Update an existing pull request in a GitHub repository.")),
+			mcp.WithToolAnnotation(mcp.ToolAnnotation{
+				Title:        t("TOOL_UPDATE_PULL_REQUEST_USER_TITLE", "Edit pull request"),
+				ReadOnlyHint: false,
+			}),
 			mcp.WithString("owner",
 				mcp.Required(),
 				mcp.Description("Repository owner"),
@@ -94,7 +102,7 @@ func UpdatePullRequest(getClient GetClientFn, t translations.TranslationHelperFu
 				mcp.Description("New description"),
 			),
 			mcp.WithString("state",
-				mcp.Description("New state ('open' or 'closed')"),
+				mcp.Description("New state"),
 				mcp.Enum("open", "closed"),
 			),
 			mcp.WithString("base",
@@ -191,7 +199,11 @@ func UpdatePullRequest(getClient GetClientFn, t translations.TranslationHelperFu
 // ListPullRequests creates a tool to list and filter repository pull requests.
 func ListPullRequests(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
 	return mcp.NewTool("list_pull_requests",
-			mcp.WithDescription(t("TOOL_LIST_PULL_REQUESTS_DESCRIPTION", "List and filter repository pull requests")),
+			mcp.WithDescription(t("TOOL_LIST_PULL_REQUESTS_DESCRIPTION", "List pull requests in a GitHub repository.")),
+			mcp.WithToolAnnotation(mcp.ToolAnnotation{
+				Title:        t("TOOL_LIST_PULL_REQUESTS_USER_TITLE", "List pull requests"),
+				ReadOnlyHint: true,
+			}),
 			mcp.WithString("owner",
 				mcp.Required(),
 				mcp.Description("Repository owner"),
@@ -201,7 +213,8 @@ func ListPullRequests(getClient GetClientFn, t translations.TranslationHelperFun
 				mcp.Description("Repository name"),
 			),
 			mcp.WithString("state",
-				mcp.Description("Filter by state ('open', 'closed', 'all')"),
+				mcp.Description("Filter by state"),
+				mcp.Enum("open", "closed", "all"),
 			),
 			mcp.WithString("head",
 				mcp.Description("Filter by head user/org and branch"),
@@ -210,10 +223,12 @@ func ListPullRequests(getClient GetClientFn, t translations.TranslationHelperFun
 				mcp.Description("Filter by base branch"),
 			),
 			mcp.WithString("sort",
-				mcp.Description("Sort by ('created', 'updated', 'popularity', 'long-running')"),
+				mcp.Description("Sort by"),
+				mcp.Enum("created", "updated", "popularity", "long-running"),
 			),
 			mcp.WithString("direction",
-				mcp.Description("Sort direction ('asc', 'desc')"),
+				mcp.Description("Sort direction"),
+				mcp.Enum("asc", "desc"),
 			),
 			WithPagination(),
 		),
@@ -293,7 +308,11 @@ func ListPullRequests(getClient GetClientFn, t translations.TranslationHelperFun
 // MergePullRequest creates a tool to merge a pull request.
 func MergePullRequest(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
 	return mcp.NewTool("merge_pull_request",
-			mcp.WithDescription(t("TOOL_MERGE_PULL_REQUEST_DESCRIPTION", "Merge a pull request")),
+			mcp.WithDescription(t("TOOL_MERGE_PULL_REQUEST_DESCRIPTION", "Merge a pull request in a GitHub repository.")),
+			mcp.WithToolAnnotation(mcp.ToolAnnotation{
+				Title:        t("TOOL_MERGE_PULL_REQUEST_USER_TITLE", "Merge pull request"),
+				ReadOnlyHint: false,
+			}),
 			mcp.WithString("owner",
 				mcp.Required(),
 				mcp.Description("Repository owner"),
@@ -313,7 +332,8 @@ func MergePullRequest(getClient GetClientFn, t translations.TranslationHelperFun
 				mcp.Description("Extra detail for merge commit"),
 			),
 			mcp.WithString("merge_method",
-				mcp.Description("Merge method ('merge', 'squash', 'rebase')"),
+				mcp.Description("Merge method"),
+				mcp.Enum("merge", "squash", "rebase"),
 			),
 		),
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
@@ -377,7 +397,11 @@ func MergePullRequest(getClient GetClientFn, t translations.TranslationHelperFun
 // GetPullRequestFiles creates a tool to get the list of files changed in a pull request.
 func GetPullRequestFiles(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
 	return mcp.NewTool("get_pull_request_files",
-			mcp.WithDescription(t("TOOL_GET_PULL_REQUEST_FILES_DESCRIPTION", "Get the list of files changed in a pull request")),
+			mcp.WithDescription(t("TOOL_GET_PULL_REQUEST_FILES_DESCRIPTION", "Get the files changed in a specific pull request.")),
+			mcp.WithToolAnnotation(mcp.ToolAnnotation{
+				Title:        t("TOOL_GET_PULL_REQUEST_FILES_USER_TITLE", "Get pull request files"),
+				ReadOnlyHint: true,
+			}),
 			mcp.WithString("owner",
 				mcp.Required(),
 				mcp.Description("Repository owner"),
@@ -436,7 +460,11 @@ func GetPullRequestFiles(getClient GetClientFn, t translations.TranslationHelper
 // GetPullRequestStatus creates a tool to get the combined status of all status checks for a pull request.
 func GetPullRequestStatus(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
 	return mcp.NewTool("get_pull_request_status",
-			mcp.WithDescription(t("TOOL_GET_PULL_REQUEST_STATUS_DESCRIPTION", "Get the combined status of all status checks for a pull request")),
+			mcp.WithDescription(t("TOOL_GET_PULL_REQUEST_STATUS_DESCRIPTION", "Get the status of a specific pull request.")),
+			mcp.WithToolAnnotation(mcp.ToolAnnotation{
+				Title:        t("TOOL_GET_PULL_REQUEST_STATUS_USER_TITLE", "Get pull request status checks"),
+				ReadOnlyHint: true,
+			}),
 			mcp.WithString("owner",
 				mcp.Required(),
 				mcp.Description("Repository owner"),
@@ -509,7 +537,11 @@ func GetPullRequestStatus(getClient GetClientFn, t translations.TranslationHelpe
 // UpdatePullRequestBranch creates a tool to update a pull request branch with the latest changes from the base branch.
 func UpdatePullRequestBranch(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
 	return mcp.NewTool("update_pull_request_branch",
-			mcp.WithDescription(t("TOOL_UPDATE_PULL_REQUEST_BRANCH_DESCRIPTION", "Update a pull request branch with the latest changes from the base branch")),
+			mcp.WithDescription(t("TOOL_UPDATE_PULL_REQUEST_BRANCH_DESCRIPTION", "Update the branch of a pull request with the latest changes from the base branch.")),
+			mcp.WithToolAnnotation(mcp.ToolAnnotation{
+				Title:        t("TOOL_UPDATE_PULL_REQUEST_BRANCH_USER_TITLE", "Update pull request branch"),
+				ReadOnlyHint: false,
+			}),
 			mcp.WithString("owner",
 				mcp.Required(),
 				mcp.Description("Repository owner"),
@@ -583,7 +615,11 @@ func UpdatePullRequestBranch(getClient GetClientFn, t translations.TranslationHe
 // GetPullRequestComments creates a tool to get the review comments on a pull request.
 func GetPullRequestComments(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
 	return mcp.NewTool("get_pull_request_comments",
-			mcp.WithDescription(t("TOOL_GET_PULL_REQUEST_COMMENTS_DESCRIPTION", "Get the review comments on a pull request")),
+			mcp.WithDescription(t("TOOL_GET_PULL_REQUEST_COMMENTS_DESCRIPTION", "Get comments for a specific pull request.")),
+			mcp.WithToolAnnotation(mcp.ToolAnnotation{
+				Title:        t("TOOL_GET_PULL_REQUEST_COMMENTS_USER_TITLE", "Get pull request comments"),
+				ReadOnlyHint: true,
+			}),
 			mcp.WithString("owner",
 				mcp.Required(),
 				mcp.Description("Repository owner"),
@@ -647,7 +683,11 @@ func GetPullRequestComments(getClient GetClientFn, t translations.TranslationHel
 // AddPullRequestReviewComment creates a tool to add a review comment to a pull request.
 func AddPullRequestReviewComment(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
 	return mcp.NewTool("add_pull_request_review_comment",
-			mcp.WithDescription(t("TOOL_ADD_PULL_REQUEST_COMMENT_DESCRIPTION", "Add a review comment to a pull request")),
+			mcp.WithDescription(t("TOOL_ADD_PULL_REQUEST_REVIEW_COMMENT_DESCRIPTION", "Add a review comment to a pull request.")),
+			mcp.WithToolAnnotation(mcp.ToolAnnotation{
+				Title:        t("TOOL_ADD_PULL_REQUEST_REVIEW_COMMENT_USER_TITLE", "Add review comment to pull request"),
+				ReadOnlyHint: false,
+			}),
 			mcp.WithString("owner",
 				mcp.Required(),
 				mcp.Description("Repository owner"),
@@ -671,21 +711,21 @@ func AddPullRequestReviewComment(getClient GetClientFn, t translations.Translati
 				mcp.Description("The relative path to the file that necessitates a comment. Required unless in_reply_to is specified."),
 			),
 			mcp.WithString("subject_type",
-				mcp.Description("The level at which the comment is targeted, 'line' or 'file'"),
+				mcp.Description("The level at which the comment is targeted"),
 				mcp.Enum("line", "file"),
 			),
 			mcp.WithNumber("line",
 				mcp.Description("The line of the blob in the pull request diff that the comment applies to. For multi-line comments, the last line of the range"),
 			),
 			mcp.WithString("side",
-				mcp.Description("The side of the diff to comment on. Can be LEFT or RIGHT"),
+				mcp.Description("The side of the diff to comment on"),
 				mcp.Enum("LEFT", "RIGHT"),
 			),
 			mcp.WithNumber("start_line",
 				mcp.Description("For multi-line comments, the first line of the range that the comment applies to"),
 			),
 			mcp.WithString("start_side",
-				mcp.Description("For multi-line comments, the starting side of the diff that the comment applies to. Can be LEFT or RIGHT"),
+				mcp.Description("For multi-line comments, the starting side of the diff that the comment applies to"),
 				mcp.Enum("LEFT", "RIGHT"),
 			),
 			mcp.WithNumber("in_reply_to",
@@ -817,7 +857,11 @@ func AddPullRequestReviewComment(getClient GetClientFn, t translations.Translati
 // GetPullRequestReviews creates a tool to get the reviews on a pull request.
 func GetPullRequestReviews(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
 	return mcp.NewTool("get_pull_request_reviews",
-			mcp.WithDescription(t("TOOL_GET_PULL_REQUEST_REVIEWS_DESCRIPTION", "Get the reviews on a pull request")),
+			mcp.WithDescription(t("TOOL_GET_PULL_REQUEST_REVIEWS_DESCRIPTION", "Get reviews for a specific pull request.")),
+			mcp.WithToolAnnotation(mcp.ToolAnnotation{
+				Title:        t("TOOL_GET_PULL_REQUEST_REVIEWS_USER_TITLE", "Get pull request reviews"),
+				ReadOnlyHint: true,
+			}),
 			mcp.WithString("owner",
 				mcp.Required(),
 				mcp.Description("Repository owner"),
@@ -875,7 +919,11 @@ func GetPullRequestReviews(getClient GetClientFn, t translations.TranslationHelp
 // CreatePullRequestReview creates a tool to submit a review on a pull request.
 func CreatePullRequestReview(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
 	return mcp.NewTool("create_pull_request_review",
-			mcp.WithDescription(t("TOOL_CREATE_PULL_REQUEST_REVIEW_DESCRIPTION", "Create a review on a pull request")),
+			mcp.WithDescription(t("TOOL_CREATE_PULL_REQUEST_REVIEW_DESCRIPTION", "Create a review for a pull request.")),
+			mcp.WithToolAnnotation(mcp.ToolAnnotation{
+				Title:        t("TOOL_CREATE_PULL_REQUEST_REVIEW_USER_TITLE", "Submit pull request review"),
+				ReadOnlyHint: false,
+			}),
 			mcp.WithString("owner",
 				mcp.Required(),
 				mcp.Description("Repository owner"),
@@ -893,7 +941,8 @@ func CreatePullRequestReview(getClient GetClientFn, t translations.TranslationHe
 			),
 			mcp.WithString("event",
 				mcp.Required(),
-				mcp.Description("Review action ('APPROVE', 'REQUEST_CHANGES', 'COMMENT')"),
+				mcp.Description("Review action to perform"),
+				mcp.Enum("APPROVE", "REQUEST_CHANGES", "COMMENT"),
 			),
 			mcp.WithString("commitId",
 				mcp.Description("SHA of commit to review"),
@@ -903,30 +952,45 @@ func CreatePullRequestReview(getClient GetClientFn, t translations.TranslationHe
 					map[string]interface{}{
 						"type":                 "object",
 						"additionalProperties": false,
-						"required":             []string{"path", "body"},
+						"required":             []string{"path", "body", "position", "line", "side", "start_line", "start_side"},
 						"properties": map[string]interface{}{
 							"path": map[string]interface{}{
 								"type":        "string",
 								"description": "path to the file",
 							},
 							"position": map[string]interface{}{
-								"type":        "number",
+								"anyOf": []interface{}{
+									map[string]string{"type": "number"},
+									map[string]string{"type": "null"},
+								},
 								"description": "position of the comment in the diff",
 							},
 							"line": map[string]interface{}{
-								"type":        "number",
+								"anyOf": []interface{}{
+									map[string]string{"type": "number"},
+									map[string]string{"type": "null"},
+								},
 								"description": "line number in the file to comment on. For multi-line comments, the end of the line range",
 							},
 							"side": map[string]interface{}{
-								"type":        "string",
+								"anyOf": []interface{}{
+									map[string]string{"type": "string"},
+									map[string]string{"type": "null"},
+								},
 								"description": "The side of the diff on which the line resides. For multi-line comments, this is the side for the end of the line range. (LEFT or RIGHT)",
 							},
 							"start_line": map[string]interface{}{
-								"type":        "number",
+								"anyOf": []interface{}{
+									map[string]string{"type": "number"},
+									map[string]string{"type": "null"},
+								},
 								"description": "The first line of the range to which the comment refers. Required for multi-line comments.",
 							},
 							"start_side": map[string]interface{}{
-								"type":        "string",
+								"anyOf": []interface{}{
+									map[string]string{"type": "string"},
+									map[string]string{"type": "null"},
+								},
 								"description": "The side of the diff on which the start line resides for multi-line comments. (LEFT or RIGHT)",
 							},
 							"body": map[string]interface{}{
@@ -1071,7 +1135,11 @@ func CreatePullRequestReview(getClient GetClientFn, t translations.TranslationHe
 // CreatePullRequest creates a tool to create a new pull request.
 func CreatePullRequest(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
 	return mcp.NewTool("create_pull_request",
-			mcp.WithDescription(t("TOOL_CREATE_PULL_REQUEST_DESCRIPTION", "Create a new pull request in a GitHub repository")),
+			mcp.WithDescription(t("TOOL_CREATE_PULL_REQUEST_DESCRIPTION", "Create a new pull request in a GitHub repository.")),
+			mcp.WithToolAnnotation(mcp.ToolAnnotation{
+				Title:        t("TOOL_CREATE_PULL_REQUEST_USER_TITLE", "Open new pull request"),
+				ReadOnlyHint: false,
+			}),
 			mcp.WithString("owner",
 				mcp.Required(),
 				mcp.Description("Repository owner"),
